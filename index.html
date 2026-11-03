@@ -594,179 +594,133 @@ footer{border-top:1px solid var(--stroke);padding:44px 0 32px;margin-top:0}
   </div>
 </section>
 
-<!-- ================= SOLUTION ================= -->
+<!-- ================= SOLUTION (COMIC STYLE) ================= -->
 <section id="solution" style="background:linear-gradient(180deg,transparent,rgba(124,92,255,.045),transparent)">
   <div class="container">
     <div class="reveal">
       <div class="eyebrow">Решение</div>
       <h2>Один персонаж — <span class="gradient-text">весь набор форматов</span></h2>
       <p class="lead">
-        Сервис объединяет генерацию, риггинг и экспорт в единый пайплайн.
-        На входе — текст, референс или эскиз; на выходе — готовые к интеграции ассеты
-        для 2D- и 3D-игр, social VR и UGC-платформ.
+        Мы превратили скучный и долгий пайплайн в быстрый и понятный процесс. 
+        Как в комиксе: от идеи до готового героя — всего пара кадров.
       </p>
     </div>
 
-    <div class="pipeline">
-      <div class="step reveal">
-        <div class="step-num">01</div>
-        <h4>Ввод</h4>
-        <p>Текст, референс или эскиз + выбор стиля</p>
+    <div class="comic-grid">
+      <div class="comic-panel reveal">
+        <div class="comic-badge">Кадр 1</div>
+        <h4>💡 Ввод и Идея</h4>
+        <p>Вы пишете текстом, кто вам нужен («киберпанк-кот с лазером»), или загружаете картинку-референс. Нейросеть понимает задачу.</p>
       </div>
-      <div class="step reveal">
-        <div class="step-num">02</div>
-        <h4>Генерация</h4>
-        <p>Концепт персонажа и вариации в заданной эстетике</p>
+      <div class="comic-panel reveal" style="margin-top: 40px;">
+        <div class="comic-badge" style="background: var(--pink); color:#fff;">Кадр 2</div>
+        <h4>🎨 Генерация</h4>
+        <p>ИИ создает концепт персонажа. Если что-то не нравится — меняете одну строчку в промпте, и герой перерисовывается.</p>
       </div>
-      <div class="step reveal">
-        <div class="step-num">03</div>
-        <h4>Подготовка</h4>
-        <p>Автоматический риггинг и базовые анимации</p>
+      <div class="comic-panel reveal">
+        <div class="comic-badge" style="background: var(--cyan); color:#000;">Кадр 3</div>
+        <h4>🦴 Авто-риггинг</h4>
+        <p>Сервис сам надевает на модель скелет и добавляет базовые анимации (ходьба, бег, прыжок). Вам не нужно быть аниматором.</p>
       </div>
-      <div class="step reveal">
-        <div class="step-num">04</div>
-        <h4>Экспорт</h4>
-        <p>2D-спрайты, 3D-модель, VRM, glTF, FBX</p>
-      </div>
-      <div class="step reveal">
-        <div class="step-num">05</div>
-        <h4>Интеграция</h4>
-        <p>Плагины Unity / Unreal и API для студий</p>
-      </div>
-    </div>
-
-    <div class="grid g-3" style="margin-top:44px">
-      <div class="card reveal">
-        <div class="card-icon">🎨</div>
-        <h3>Генерация в заданном стиле</h3>
-        <p>Пиксель-арт, мультяшный 3D, стилизованный реализм, chibi — с сохранением единой эстетики серии персонажей.</p>
-      </div>
-      <div class="card reveal">
-        <div class="card-icon">🦴</div>
-        <h3>Авто-риггинг и анимации</h3>
-        <p>Базовый humanoid-ригг и набор анимаций idle, walk, run, emotes — без ручной настройки. Для маскотов — упрощённые ригги и процедурная анимация.</p>
-      </div>
-      <div class="card reveal">
-        <div class="card-icon">🔌</div>
-        <h3>Интеграции и API</h3>
-        <p>Экспортёры и плагины для Unity и Unreal Engine, API для встраивания в пайплайны студий и UGC-платформы.</p>
+      <div class="comic-panel reveal" style="margin-top: 40px;">
+        <div class="comic-badge" style="background: var(--lime); color:#000;">Кадр 4</div>
+        <h4>🚀 Экспорт</h4>
+        <p>Забираете готового персонажа в нужном формате для Unity или Unreal. Один клик — и он уже в игре.</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ================= FORMATS ================= -->
+<!-- ================= FORMATS (RADIAL METAPHOR) ================= -->
 <section id="formats">
   <div class="container">
     <div class="reveal">
       <div class="eyebrow">Форматы</div>
-      <h2>Готово к <span class="gradient-text">любому движку</span></h2>
+      <h2>Швейцарский нож <span class="gradient-text">для ваших персонажей</span></h2>
       <p class="lead">
-        Один и тот же персонаж выдаётся в наборе представлений: спрайты для 2D-игр и UI,
-        3D-модель для сцен, VRM — открытый платформо-независимый формат для гуманоидных аватаров,
-        совместимый с glTF и поддерживаемый Unity, VTuber-приложениями и social VR.
+        Загружаете один исходник — получаете целую команду файлов. 
+        Наведите на карточку, чтобы посмотреть, как это работает.
       </p>
-      <div class="format-bar">
-        <div class="format"><span class="fdot f-2d"></span> 2D-спрайты / спрайт-листы</div>
-        <div class="format"><span class="fdot f-3d"></span> 3D-модель</div>
-        <div class="format"><span class="fdot f-vrm"></span> VRM</div>
-        <div class="format"><span class="fdot f-gl"></span> glTF / GLB</div>
-        <div class="format"><span class="fdot f-fbx"></span> FBX</div>
+    </div>
+
+    <div class="radial-hub reveal">
+      <div class="hub-center">ВАШ<br>ПЕРСОНАЖ</div>
+      
+      <div class="orbit-card oc-2d">
+        <span style="color: var(--pink);">●</span> 2D-спрайты
       </div>
-      <div class="grid g-3" style="margin-top:36px">
-        <div class="card reveal">
-          <div class="tagline">2D-пайплайн</div>
-          <h3>Спрайты и изометрия</h3>
-          <p>Спрайт-листы, 8-направленные развёртки, изометрические тайлы и анимированные маскоты для 2D- и мобильных игр.</p>
-        </div>
-        <div class="card reveal">
-          <div class="tagline">3D-пайплайн</div>
-          <h3>Модели с риггом</h3>
-          <p>Стилизованные 3D-персонажи с автоматическим humanoid-риггом и набором базовых анимаций, готовые к импорту в движок.</p>
-        </div>
-        <div class="card reveal">
-          <div class="tagline">XR-пайплайн</div>
-          <h3>VRM для social VR</h3>
-          <p>Аватары для VRM-совместимых сред: social VR, VTuber-сценарии, метавселенные и UGC-платформы.</p>
-        </div>
+      <div class="orbit-card oc-3d">
+        <span style="color: var(--violet);">●</span> 3D-модель
       </div>
+      <div class="orbit-card oc-vrm">
+        <span style="color: var(--cyan);">●</span> VRM
+      </div>
+      <div class="orbit-card oc-gl">
+        <span style="color: var(--lime);">●</span> glTF / GLB
+      </div>
+      <div class="orbit-card oc-fbx">
+        <span style="color: var(--yellow);">●</span> FBX
+      </div>
+    </div>
+    
+    <div style="text-align: center; margin-top: 20px;" class="reveal">
+       <p style="color: var(--muted); font-size: 14px;">* 2D-спрайты, изометрия и 8-направленные развертки для мобильных игр.</p>
     </div>
   </div>
 </section>
 
-<!-- ================= MARKET ================= -->
-<section id="market" style="background:linear-gradient(180deg,transparent,rgba(34,211,238,.04),transparent)">
+<!-- ================= ECONOMICS (TICKET STYLE) ================= -->
+<section id="market" style="background:linear-gradient(180deg,transparent,rgba(250,204,21,.03),transparent)">
   <div class="container">
     <div class="reveal">
-      <div class="eyebrow">Экономика</div>
-      <h2>Сколько это стоит <span class="gradient-text">сейчас и с нами</span></h2>
+      <div class="eyebrow">Выгода</div>
+      <h2>Ваш чек <span class="gradient-text">на экономию</span></h2>
       <p class="lead">
-        Разработка игровых персонажей — это дорого. Мы не просто генерируем картинки, мы экономим 
-        бюджет студии. Сравните рыночные цены на фрилансе и стоимость подписки в нашем сервисе.
+        Разработка персонажей на аутсорсе бьет по бюджету инди-студий. 
+        Посмотрите, сколько вы оставляете в кассе, выбирая AvatarForge.
       </p>
     </div>
 
-    <div class="market-grid">
-      <!-- Карточка 1 -->
-      <div class="m-card reveal">
-        <div class="m-title">Стилизованный 3D-персонаж</div>
-        <div style="font-size: 13.5px; color: var(--muted); margin-bottom: 6px;">Сейчас (аутсорс / фриланс):</div>
-        <div class="m-values" style="margin-bottom: 16px;">
-          <span class="m-now" style="color: var(--muted); font-size: 22px; text-decoration: line-through; opacity: 0.7;">25 000 – 40 000 ₽</span>
+    <div class="price-ticket reveal">
+      <div class="ticket-row">
+        <span style="font-weight: 600;">Стилизованный 3D-персонаж</span>
+        <div>
+          <span class="ticket-old">25 000 – 40 000 ₽</span>
+          <span style="margin: 0 10px; color: var(--muted);">→</span>
+          <span class="ticket-new">от 1 500 ₽</span>
         </div>
-        <div style="font-size: 13.5px; color: var(--lime); margin-bottom: 6px; font-weight: 600;">С AvatarForge:</div>
-        <div class="m-values">
-          <span class="m-future" style="font-size: 32px; font-weight: 700;">от 1 500 ₽</span>
-        </div>
-        <div class="m-note" style="margin-top: 14px;">Включено в подписку или оплата по факту генерации.</div>
       </div>
-
-      <!-- Карточка 2 -->
-      <div class="m-card reveal">
-        <div class="m-title">VRM-аватар (для VTuber / VR)</div>
-        <div style="font-size: 13.5px; color: var(--muted); margin-bottom: 6px;">Сейчас (заказной):</div>
-        <div class="m-values" style="margin-bottom: 16px;">
-          <span class="m-now" style="color: var(--muted); font-size: 22px; text-decoration: line-through; opacity: 0.7;">$50 – $1 200</span>
+      <div class="ticket-row">
+        <span style="font-weight: 600;">VRM-аватар (VTuber / VR)</span>
+        <div>
+          <span class="ticket-old">$50 – $1 200</span>
+          <span style="margin: 0 10px; color: var(--muted);">→</span>
+          <span class="ticket-new">от 2 000 ₽</span>
         </div>
-        <div style="font-size: 13.5px; color: var(--lime); margin-bottom: 6px; font-weight: 600;">С AvatarForge:</div>
-        <div class="m-values">
-          <span class="m-future" style="font-size: 32px; font-weight: 700;">от 2 000 ₽</span>
-        </div>
-        <div class="m-note" style="margin-top: 14px;">Готовый аватар с человеческим скелетом за 1 генерацию.</div>
       </div>
-
-      <!-- Карточка 3 -->
-      <div class="m-card reveal">
-        <div class="m-title">2D-спрайты и анимации</div>
-        <div style="font-size: 13.5px; color: var(--muted); margin-bottom: 6px;">Сейчас (за набор):</div>
-        <div class="m-values" style="margin-bottom: 16px;">
-          <span class="m-now" style="color: var(--muted); font-size: 22px; text-decoration: line-through; opacity: 0.7;">от 5 000 ₽</span>
+      <div class="ticket-row">
+        <span style="font-weight: 600;">2D-спрайты (набор)</span>
+        <div>
+          <span class="ticket-old">от 5 000 ₽</span>
+          <span style="margin: 0 10px; color: var(--muted);">→</span>
+          <span class="ticket-new">В подписке</span>
         </div>
-        <div style="font-size: 13.5px; color: var(--lime); margin-bottom: 6px; font-weight: 600;">С AvatarForge:</div>
-        <div class="m-values">
-          <span class="m-future" style="font-size: 32px; font-weight: 700;">В подписке</span>
-        </div>
-        <div class="m-note" style="margin-top: 14px;">8-направленные развертки, изометрия и базовые эмоции.</div>
       </div>
-
-      <!-- Карточка 4 -->
-      <div class="m-card reveal">
-        <div class="m-title">Время на создание</div>
-        <div style="font-size: 13.5px; color: var(--muted); margin-bottom: 6px;">Традиционный пайплайн:</div>
-        <div class="m-values" style="margin-bottom: 16px;">
-          <span class="m-now" style="color: var(--muted); font-size: 22px; text-decoration: line-through; opacity: 0.7;">2 – 8 недель</span>
+      <div class="ticket-row">
+        <span style="font-weight: 600;">Время на создание</span>
+        <div>
+          <span class="ticket-old">2 – 8 недель</span>
+          <span style="margin: 0 10px; color: var(--muted);">→</span>
+          <span class="ticket-new">до 30 минут</span>
         </div>
-        <div style="font-size: 13.5px; color: var(--lime); margin-bottom: 6px; font-weight: 600;">С AvatarForge:</div>
-        <div class="m-values">
-          <span class="m-future" style="font-size: 32px; font-weight: 700;">до 30 минут</span>
-        </div>
-        <div class="m-note" style="margin-top: 14px;">Создавайте прототипы, меняйте стиль и генерируйте вариации.</div>
       </div>
-    </div>
-
-    <div class="tam-note reveal" style="background: rgba(163,230,53,.07); border-color: rgba(163,230,53,.3);">
-      <b>💡 Простая математика:</b> На проекте из 10 персонажей вы экономите <b>от 150 000 до 300 000 рублей</b> и 
-      до <b>2 месяцев разработки</b>. Эти деньги и время лучше потратить на геймплей, маркетинг или звук.
+      <div style="margin-top: 30px; padding-top: 20px; border-top: 2px dashed var(--stroke-2); text-align: center;">
+        <div style="font-size: 14px; color: var(--muted); margin-bottom: 8px;">ИТОГО НА ПРОЕКТЕ ИЗ 10 ПЕРСОНАЖЕЙ ВЫ ЭКОНОМИТЕ:</div>
+        <div style="font-size: 32px; font-weight: 800; color: var(--yellow); text-shadow: 0 0 20px rgba(250,204,21,0.3);">
+          от 150 000 до 300 000 ₽
+        </div>
+        <div style="font-size: 13px; color: var(--muted); margin-top: 8px;">и до 2 месяцев разработки</div>
+      </div>
     </div>
   </div>
 </section>
