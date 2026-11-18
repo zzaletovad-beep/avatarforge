@@ -1,23 +1,433 @@
-<!doctype html>
-<html lang="ru">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AvatarForge — AI-генератор 2D-персонажей</title>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <style>
-      html, body { margin: 0; padding: 0; width: 100%; height: 100%; }
-      html.dark, html.dark body { background-color: #05060f !important; color: #e9ebf7; }
-    </style>
-    <script>
-      (function () {
-        document.documentElement.classList.add("dark");
-        document.documentElement.setAttribute("data-theme", "dark");
-      })();
-    </script>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<!DOCTYPE html>
+<html lang="ru" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AvatarForge — AI-генератор 2D-персонажей</title>
+  
+  <!-- Шрифты -->
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            bg: '#05060f',
+            surface: '#131524',
+            stroke: 'rgba(255, 255, 255, 0.1)',
+            text: '#e9ebf7',
+            muted: '#9aa1bb',
+            violet: '#7c5cff',
+            'violet-hover': '#6a4ce0',
+            cyan: '#22d3ee',
+            error: '#ff6b6b',
+          },
+          fontFamily: {
+            space: ['"Space Grotesk"', 'sans-serif'],
+            inter: ['Inter', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- React и Babel (позволяет запускать React прямо в браузере) -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #05060f;
+      color: #e9ebf7;
+      min-height: 100vh;
+      margin: 0;
+    }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+    
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    .animate-spin-custom { animation: spin 1s linear infinite; }
+    
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel" data-presets="react,typescript">
+    const { useState, useCallback } = React;
+
+    // ============================================
+    // ТИПЫ И ДАННЫЕ (formats.ts / types.ts)
+    // ============================================
+    const FORMATS = [
+      { id: 'sprite', name: 'Игровой спрайт', description: 'Персонаж в полный рост, вид спереди. Для платформеров и RPG.', icon: '🎮', promptTemplate: '{subject}, full body game character sprite, front view, standing pose, centered composition, solid white background, clean outlines, 2D game asset, high detail, no shadow', width: 512, height: 512, accent: '#7c5cff' },
+      { id: 'portrait', name: 'Портрет', description: 'Голова и плечи. Для аватаров, диалогов, карточек.', icon: '👤', promptTemplate: '{subject}, portrait, head and shoulders, centered, looking at viewer, solid dark background, detailed face, character art, game UI portrait style', width: 512, height: 512, accent: '#22d3ee' },
+      { id: 'sticker', name: 'Стикер', description: 'С белой обводкой. Для мессенджеров и наклеек.', icon: '🏷️', promptTemplate: '{subject}, sticker design, thick white outline, die-cut sticker style, cute, vibrant colors, solid white background, no shadow, clean edges, vector style', width: 512, height: 512, accent: '#f472b6' },
+      { id: 'pixel', name: 'Пиксель-арт', description: 'Ретро-стиль 16-bit. Для олдскульных игр.', icon: '👾', promptTemplate: '{subject}, pixel art style, 16-bit retro game sprite, limited color palette, crisp pixels, full body, centered, solid black background, nostalgic game aesthetic', width: 512, height: 512, accent: '#4ade80' },
+      { id: 'isometric', name: 'Изометрия', description: 'Вид 3/4 сверху. Для стратегий и тайловых карт.', icon: '🗺️', promptTemplate: '{subject}, isometric view, 3/4 top-down angle, game asset, detailed, solid white background, isometric projection, clean 2D render, no perspective distortion', width: 512, height: 512, accent: '#fb923c' },
+      { id: 'chibi', name: 'Чиби', description: 'Маленький милый персонаж с большой головой.', icon: '🧸', promptTemplate: '{subject}, chibi style, super deformed, big head small body, cute proportions, kawaii, pastel colors, full body, centered, solid white background, adorable', width: 512, height: 512, accent: '#e879f9' },
+      { id: 'concept', name: 'Концепт-арт', description: 'Детальный арт с несколькими ракурсами. Для разработки.', icon: '🎨', promptTemplate: '{subject}, character concept art, multiple views, turnaround sheet, detailed design, professional game art, white background, front view and side view, annotations, high quality', width: 768, height: 512, accent: '#facc15' },
+      { id: 'icon', name: 'Иконка', description: 'Компактная иконка для UI, инвентаря, способностей.', icon: '⚡', promptTemplate: '{subject}, game icon, square format, centered, bold design, readable at small size, vibrant, clean, solid dark background, UI game icon style, no text', width: 256, height: 256, accent: '#f87171' }
+    ];
+
+    const STYLES = [
+      { id: 'vector', name: 'Векторный', promptSuffix: 'clean vector art, flat colors, sharp lines, modern game style' },
+      { id: 'anime', name: 'Аниме', promptSuffix: 'anime art style, cel shaded, vibrant colors, manga inspired, detailed eyes' },
+      { id: 'realistic', name: 'Реалистичный', promptSuffix: 'semi-realistic, detailed rendering, soft lighting, painterly, AAA game quality' },
+      { id: 'handpainted', name: 'Ручная роспись', promptSuffix: 'hand-painted style, textured brush strokes, fantasy illustration, warm tones' },
+      { id: 'comic', name: 'Комикс', promptSuffix: 'comic book style, bold ink outlines, halftone shading, dynamic, graphic novel art' },
+      { id: 'watercolor', name: 'Акварель', promptSuffix: 'watercolor painting style, soft edges, color bleeding, artistic, dreamy atmosphere' }
+    ];
+
+    const CHARACTER_PRESETS = [
+      { label: '🐱 Киберпанк-кот', value: 'cyberpunk cat hacker with neon goggles and leather jacket' },
+      { label: '⚔️ Пиксельный рыцарь', value: 'medieval knight in shining armor with a glowing sword' },
+      { label: '🧙 Тёмный маг', value: 'dark sorcerer with glowing purple eyes and tattered robes' },
+      { label: '🤖 Робот-самурай', value: 'mechanical samurai robot with katana and neon accents' },
+      { label: '🧝 Эльфийка-лучница', value: 'elven archer with green cloak and long silver hair' },
+      { label: '👽 Космический пират', value: 'space pirate with eyepatch and laser blaster' },
+      { label: '🐉 Дракон-подросток', value: 'young dragon with colorful scales and mischievous smile' },
+      { label: '🧟 Зомби-бариста', value: 'zombie barista with coffee cup and apron, funny expression' }
+    ];
+
+    // ============================================
+    // ЛОГИКА (api.ts / promptBuilder.ts)
+    // ============================================
+    const buildImageUrl = (prompt, width, height) => {
+      const encoded = encodeURIComponent(prompt);
+      const seed = Math.floor(Math.random() * 100000);
+      return `https://image.pollinations.ai/prompt/${encoded}?width=${width}&height=${height}&nologo=true&seed=${seed}`;
+    };
+
+    const loadImage = (url) => {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => resolve(img);
+        img.onerror = () => reject(new Error('Не удалось загрузить изображение'));
+        img.src = url;
+      });
+    };
+
+    const generateImage = async (prompt, width, height) => {
+      const url = buildImageUrl(prompt, width, height);
+      await loadImage(url);
+      return url;
+    };
+
+    const downloadImage = async (url, filename) => {
+      try {
+        const response = await fetch(url);
+        const blob = await response.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(blobUrl);
+      } catch {
+        window.open(url, '_blank');
+      }
+    };
+
+    const buildSubject = (character) => {
+      const parts = [];
+      if (character.description.trim()) parts.push(character.description.trim());
+      if (character.race?.trim()) parts.push(`${character.race.trim()} race`);
+      if (character.class?.trim()) parts.push(`${character.class.trim()} class`);
+      if (character.mood?.trim()) parts.push(`expression: ${character.mood.trim()}`);
+      if (character.colors?.trim()) parts.push(`color palette: ${character.colors.trim()}`);
+      return parts.join(', ');
+    };
+
+    const buildPrompt = (character, formatId, styleId) => {
+      const format = FORMATS.find(f => f.id === formatId);
+      const style = STYLES.find(s => s.id === styleId);
+      if (!format || !style) return '';
+      const subject = buildSubject(character);
+      let prompt = format.promptTemplate.replace('{subject}', subject);
+      prompt += `, ${style.promptSuffix}`;
+      prompt += ', masterpiece, best quality, highly detailed';
+      return prompt;
+    };
+
+    // ============================================
+    // КОМПОНЕНТЫ UI
+    // ============================================
+    function FormatSelector({ selected, onChange }) {
+      return (
+        <div className="w-full">
+          <h2 className="text-lg font-space font-bold mb-3 text-text">📐 Формат</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            {FORMATS.map((format) => {
+              const isActive = selected === format.id;
+              return (
+                <button key={format.id} onClick={() => onChange(format.id)}
+                  className={`relative p-3 rounded-xl border text-left transition-all duration-200 cursor-pointer ${isActive ? 'border-violet bg-violet/10 shadow-lg shadow-violet/20' : 'border-stroke bg-surface hover:border-white/20 hover:bg-surface/80'}`}>
+                  <div className="text-2xl mb-1">{format.icon}</div>
+                  <div className="text-sm font-semibold text-text leading-tight">{format.name}</div>
+                  <div className="text-xs text-muted mt-1 leading-tight line-clamp-2">{format.description}</div>
+                  {isActive && <div className="absolute top-2 right-2 w-2 h-2 rounded-full" style={{ backgroundColor: format.accent }} />}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      );
+    }
+
+    function StyleSelector({ selected, onChange }) {
+      return (
+        <div className="w-full">
+          <h2 className="text-lg font-space font-bold mb-3 text-text">🎨 Стиль</h2>
+          <div className="flex flex-wrap gap-2">
+            {STYLES.map((style) => {
+              const isActive = selected === style.id;
+              return (
+                <button key={style.id} onClick={() => onChange(style.id)}
+                  className={`px-4 py-2 rounded-lg border text-sm font-medium transition-all duration-200 cursor-pointer ${isActive ? 'border-cyan bg-cyan/10 text-cyan' : 'border-stroke bg-surface text-muted hover:text-text hover:border-white/20'}`}>
+                  {style.name}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      );
+    }
+
+    function CharacterForm({ character, onChange }) {
+      const update = (field, value) => onChange({ ...character, [field]: value });
+      return (
+        <div className="w-full">
+          <h2 className="text-lg font-space font-bold mb-3 text-text">🧙 Персонаж</h2>
+          <div className="mb-4">
+            <label className="text-xs text-muted uppercase tracking-wider mb-2 block">Быстрый выбор</label>
+            <div className="flex flex-wrap gap-2">
+              {CHARACTER_PRESETS.map((preset) => (
+                <button key={preset.label} onClick={() => update('description', preset.value)}
+                  className={`px-3 py-1.5 rounded-lg border text-xs font-medium transition-all cursor-pointer ${character.description === preset.value ? 'border-violet bg-violet/10 text-violet' : 'border-stroke bg-surface text-muted hover:text-text hover:border-white/20'}`}>
+                  {preset.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="mb-3">
+            <label className="text-xs text-muted uppercase tracking-wider mb-1.5 block">Описание *</label>
+            <textarea value={character.description} onChange={(e) => update('description', e.target.value)}
+              placeholder="Опиши персонажа: кто он, как выглядит, что делает..." rows={3}
+              className="w-full px-4 py-3 rounded-xl border border-stroke bg-surface text-text text-sm outline-none transition-all duration-300 focus:border-violet resize-none" />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs text-muted uppercase tracking-wider mb-1.5 block">Раса</label>
+              <input type="text" value={character.race || ''} onChange={(e) => update('race', e.target.value)} placeholder="Человек, эльф, робот..."
+                className="w-full px-3 py-2 rounded-lg border border-stroke bg-surface text-text text-sm outline-none transition-all focus:border-violet" />
+            </div>
+            <div>
+              <label className="text-xs text-muted uppercase tracking-wider mb-1.5 block">Класс</label>
+              <input type="text" value={character.class || ''} onChange={(e) => update('class', e.target.value)} placeholder="Воин, маг, вор..."
+                className="w-full px-3 py-2 rounded-lg border border-stroke bg-surface text-text text-sm outline-none transition-all focus:border-violet" />
+            </div>
+            <div>
+              <label className="text-xs text-muted uppercase tracking-wider mb-1.5 block">Настроение</label>
+              <input type="text" value={character.mood || ''} onChange={(e) => update('mood', e.target.value)} placeholder="Дерзкий, грустный, злой..."
+                className="w-full px-3 py-2 rounded-lg border border-stroke bg-surface text-text text-sm outline-none transition-all focus:border-violet" />
+            </div>
+            <div>
+              <label className="text-xs text-muted uppercase tracking-wider mb-1.5 block">Палитра</label>
+              <input type="text" value={character.colors || ''} onChange={(e) => update('colors', e.target.value)} placeholder="Неон, пастель, тёмные тона..."
+                className="w-full px-3 py-2 rounded-lg border border-stroke bg-surface text-text text-sm outline-none transition-all focus:border-violet" />
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function ResultPreview({ status, imageUrl, prompt, filename, errorMessage }) {
+      return (
+        <div className="w-full bg-surface border border-stroke rounded-2xl p-5 min-h-[350px] flex flex-col items-center justify-center">
+          {status === 'idle' && (
+            <div className="text-center">
+              <div className="text-5xl mb-4 opacity-30">🖼️</div>
+              <p className="text-muted text-sm">Настрой параметры и нажми «Сгенерировать»</p>
+            </div>
+          )}
+          {status === 'loading' && (
+            <div className="flex flex-col items-center">
+              <div className="w-12 h-12 border-4 border-white/10 border-t-cyan rounded-full animate-spin-custom mb-4" />
+              <p className="text-muted text-sm animate-pulse">Генерируем изображение...</p>
+              {prompt && (
+                <details className="mt-4 max-w-xs w-full">
+                  <summary className="text-xs text-muted/60 cursor-pointer hover:text-muted transition-colors">Показать промпт</summary>
+                  <p className="text-xs text-muted/50 mt-2 text-left bg-bg/50 p-3 rounded-lg border border-stroke break-words">{prompt}</p>
+                </details>
+              )}
+            </div>
+          )}
+          {status === 'success' && imageUrl && (
+            <div className="flex flex-col items-center w-full animate-fade-in">
+              <img src={imageUrl} alt="Generated character" className="max-w-full max-h-[400px] rounded-xl shadow-2xl shadow-violet/10" />
+              <div className="flex gap-2 mt-4">
+                <button onClick={() => downloadImage(imageUrl, filename || 'character.png')}
+                  className="px-5 py-2.5 bg-violet text-white text-sm font-semibold rounded-lg hover:bg-violet-hover transition-all cursor-pointer hover:-translate-y-0.5">
+                  ⬇ Скачать PNG
+                </button>
+                {prompt && (
+                  <details className="relative">
+                    <summary className="px-4 py-2.5 bg-white/5 border border-stroke text-muted text-sm rounded-lg cursor-pointer hover:bg-white/10 transition-colors list-none">📋 Промпт</summary>
+                    <div className="absolute bottom-full mb-2 right-0 w-80 bg-bg border border-stroke rounded-xl p-3 shadow-xl z-10">
+                      <p className="text-xs text-muted text-left break-words">{prompt}</p>
+                      <button onClick={() => navigator.clipboard.writeText(prompt)} className="mt-2 text-xs text-cyan hover:underline cursor-pointer">Копировать</button>
+                    </div>
+                  </details>
+                )}
+              </div>
+            </div>
+          )}
+          {status === 'error' && (
+            <div className="text-center">
+              <div className="text-4xl mb-3">⚠️</div>
+              <p className="text-error text-sm">{errorMessage || 'Ошибка генерации'}</p>
+              <p className="text-muted text-xs mt-2">Попробуй изменить промпт или повторить</p>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    function Gallery({ images, onRemove }) {
+      if (images.length === 0) return null;
+      return (
+        <div className="w-full mt-8">
+          <h2 className="text-lg font-space font-bold mb-4 text-text">🖼️ Галерея ({images.length})</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+            {images.map((img) => {
+              const format = FORMATS.find(f => f.id === img.formatId);
+              const style = STYLES.find(s => s.id === img.styleId);
+              return (
+                <div key={img.id} className="group relative bg-surface border border-stroke rounded-xl overflow-hidden animate-fade-in">
+                  <img src={img.url} alt={img.character.description} className="w-full aspect-square object-cover" />
+                  <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col items-center justify-center p-3">
+                    <div className="text-xs text-white/80 text-center mb-2">
+                      <span className="font-semibold">{format?.icon} {format?.name}</span><br /><span>{style?.name}</span>
+                    </div>
+                    <div className="flex gap-2">
+                      <button onClick={() => downloadImage(img.url, `${img.character.name || 'character'}_${img.formatId}.png`)}
+                        className="px-3 py-1.5 bg-violet text-white text-xs rounded-lg hover:bg-violet-hover transition-colors cursor-pointer">⬇ PNG</button>
+                      <button onClick={() => onRemove(img.id)}
+                        className="px-3 py-1.5 bg-white/10 text-white text-xs rounded-lg hover:bg-white/20 transition-colors cursor-pointer">✕</button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      );
+    }
+
+    // ============================================
+    // ГЛАВНЫЙ КОМПОНЕНТ (App)
+    // ============================================
+    function App() {
+      const [formatId, setFormatId] = useState('sprite');
+      const [styleId, setStyleId] = useState('vector');
+      const [character, setCharacter] = useState({ name: '', description: 'cyberpunk cat hacker with neon goggles and leather jacket', race: '', class: '', mood: '', colors: '' });
+      const [genStatus, setGenStatus] = useState('idle');
+      const [currentImage, setCurrentImage] = useState(undefined);
+      const [currentPrompt, setCurrentPrompt] = useState(undefined);
+      const [errorMsg, setErrorMsg] = useState(undefined);
+      const [gallery, setGallery] = useState([]);
+      const [isGenerating, setIsGenerating] = useState(false);
+
+      const handleGenerate = useCallback(async () => {
+        if (!character.description.trim()) return alert('Опиши персонажа!');
+        setIsGenerating(true); setGenStatus('loading'); setErrorMsg(undefined);
+        try {
+          const prompt = buildPrompt(character, formatId, styleId);
+          setCurrentPrompt(prompt);
+          const format = FORMATS.find(f => f.id === formatId);
+          const imageUrl = await generateImage(prompt, format.width, format.height);
+          setCurrentImage(imageUrl); setGenStatus('success');
+          const newImage = { id: Date.now().toString() + Math.random().toString(36).slice(2), url: imageUrl, prompt, formatId, styleId, character: { ...character }, createdAt: Date.now() };
+          setGallery(prev => [newImage, ...prev]);
+        } catch (err) {
+          setGenStatus('error'); setErrorMsg(err.message || 'Неизвестная ошибка');
+        } finally {
+          setIsGenerating(false);
+        }
+      }, [character, formatId, styleId]);
+
+      const previewPrompt = character.description.trim() ? buildPrompt(character, formatId, styleId) : '';
+
+      return (
+        <div className="min-h-screen bg-bg text-text font-inter px-4 py-8 sm:px-6 lg:px-8 relative">
+          <div className="fixed inset-0 pointer-events-none overflow-hidden">
+            <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] bg-violet/5 rounded-full blur-[150px]" />
+            <div className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] bg-cyan/5 rounded-full blur-[150px]" />
+          </div>
+
+          <div className="relative z-10 max-w-6xl mx-auto">
+            <header className="text-center mb-10">
+              <h1 className="font-space text-4xl sm:text-5xl font-bold mb-2">Avatar<span className="text-cyan">Forge</span></h1>
+              <p className="text-muted text-lg">AI-генератор 2D-персонажей для игр</p>
+              <p className="text-muted/60 text-sm mt-1">Выбери формат → стиль → опиши персонажа → генерируй</p>
+            </header>
+
+            <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-6">
+              <div className="space-y-6">
+                <FormatSelector selected={formatId} onChange={setFormatId} />
+                <StyleSelector selected={styleId} onChange={setStyleId} />
+                <CharacterForm character={character} onChange={setCharacter} />
+
+                {previewPrompt && (
+                  <div className="bg-surface/50 border border-stroke rounded-xl p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs text-muted uppercase tracking-wider">Промпт (предпросмотр)</span>
+                      <button onClick={() => navigator.clipboard.writeText(previewPrompt)} className="text-xs text-cyan hover:underline cursor-pointer">Копировать</button>
+                    </div>
+                    <p className="text-xs text-muted/70 leading-relaxed font-mono break-words">{previewPrompt}</p>
+                  </div>
+                )}
+
+                <div className="flex gap-3">
+                  <button onClick={handleGenerate} disabled={isGenerating}
+                    className="flex-1 px-6 py-4 bg-violet text-white font-bold rounded-xl text-base transition-all duration-300 hover:bg-violet-hover hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none cursor-pointer">
+                    {isGenerating ? '⏳ Генерация...' : '✨ Сгенерировать'}
+                  </button>
+                </div>
+              </div>
+
+              <div className="lg:sticky lg:top-6 lg:self-start">
+                <ResultPreview status={genStatus} imageUrl={currentImage} prompt={currentPrompt} filename={`${character.name || 'character'}_${formatId}.png`} errorMessage={errorMsg} />
+              </div>
+            </div>
+
+            <Gallery images={gallery} onRemove={(id) => setGallery(prev => prev.filter(img => img.id !== id))} />
+
+            <footer className="mt-10 text-center text-muted/50 text-xs pb-10">
+              <p>AvatarForge • AI-генерация через Pollinations.ai</p>
+            </footer>
+          </div>
+        </div>
+      );
+    }
+
+    // Запуск приложения
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
 </html>
